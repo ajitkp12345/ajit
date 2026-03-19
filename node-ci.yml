@@ -1,0 +1,30 @@
+import 'dotenv/config';
+import axios from 'axios';
+import { config } from '../src/config.js';
+
+(async () => {
+  try {
+    if (!config.BOT_TOKEN || !config.WEBHOOK_URL) {
+      throw new Error('BOT_TOKEN and WEBHOOK_URL are required.');
+    }
+
+    const payload = {
+      name: 'Webex ACK Bot – messages created',
+      targetUrl: config.WEBHOOK_URL,
+      resource: 'messages',
+      event: 'created'
+    };
+
+    const res = await axios.post('https://webexapis.com/v1/webhooks', payload, {
+      headers: {
+        Authorization: `Bearer ${config.BOT_TOKEN}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    console.log('✅ Webhook created:', res.data.id, '→', res.data.targetUrl);
+  } catch (err) {
+    console.error('❌ Failed to create webhook:', err.response?.data || err.message);
+    process.exit(1);
+  }
+})();
